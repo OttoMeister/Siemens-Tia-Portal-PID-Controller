@@ -28,7 +28,7 @@ The controller produce a outputs from 0 to 100. If used with a binary actor you 
 - ib_Reset = Empty the integral and sets the output to zero
 - or_Output = Output value in % from 0 to 100
 
-![](PID-Control2.png)
+![](PID-Control.png)
 
 ## Installing
 Installing is quite simple. Insert the two SLC files under "External source files" and then execute the menu item "Generate blocks from source".
