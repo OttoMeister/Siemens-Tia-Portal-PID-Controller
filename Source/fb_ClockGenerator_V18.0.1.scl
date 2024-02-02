@@ -1,0 +1,44 @@
+﻿FUNCTION_BLOCK "fb_ClockGenerator_V18.0.1"
+TITLE = Pulsweitenmodulation
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : sf
+FAMILY : XXX
+VERSION : 1.0
+   VAR_INPUT 
+      ir_PulsePauseLengthSeconds { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;   // Input in s
+      ir_PulsePauseRatioPercent { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real := 50.0;   // Pulse pause ratio in %
+      ib_Start { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+   END_VAR
+
+   VAR_OUTPUT 
+      ob_clock { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;   // -
+   END_VAR
+
+   VAR 
+      instTofTimePulse {InstructionName := 'TOF_TIME'; LibVersion := '1.0'; ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'; S7_SetPoint := 'False'} : TOF_TIME;   // -
+      instTofTimePause {InstructionName := 'TOF_TIME'; LibVersion := '1.0'; ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'; S7_SetPoint := 'False'} : TOF_TIME;   // -
+      statTimePulse { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Time;   // -
+      statTimePause { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Time;   // -
+   END_VAR
+
+   VAR_TEMP 
+      tempPulseRate : Real;   // -
+      tempPauseRate : Real;   // -
+   END_VAR
+
+
+BEGIN
+	#tempPulseRate := #ir_PulsePauseRatioPercent / 100;
+	#tempPauseRate := 1 - #tempPulseRate;
+	#statTimePulse := UDINT_TO_TIME(REAL_TO_UDINT((1000.0 * #ir_PulsePauseLengthSeconds * #tempPulseRate)));    
+	#statTimePause := UDINT_TO_TIME(REAL_TO_UDINT((1000.0 * #ir_PulsePauseLengthSeconds * #tempPauseRate))); 
+	#instTofTimePulse(IN := NOT #instTofTimePause.Q,PT := #statTimePulse);
+	#instTofTimePause(IN := #instTofTimePulse.Q, PT := #statTimePause);
+	IF #ib_Start = TRUE
+	THEN
+	    #ob_clock := #instTofTimePulse.Q;
+	ELSE
+	    #ob_clock := FALSE;
+	END_IF;
+END_FUNCTION_BLOCK
+

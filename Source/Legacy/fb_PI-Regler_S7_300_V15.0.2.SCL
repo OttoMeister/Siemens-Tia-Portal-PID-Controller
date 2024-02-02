@@ -1,0 +1,55 @@
+FUNCTION_BLOCK fb001
+
+   VAR_INPUT 
+      ir_Istwert  : Real;   // Istwert
+      ir_Sollwert : Real;   // Sollwert
+      ir_ProportionalVerstaerkung : Real := 20.0;   // Proportional-Verstaerkung
+      ir_IntegralVerstaerkung  : Real := 5.0;   // Integral-Verstaerkung
+      ib_Reset : Bool := FALSE;   // Reset
+      ii_OB1_PREV_CYCLE  : Int := 5;   // Cycle time of previous OB1 scan (milliseconds)
+   END_VAR
+
+   VAR_OUTPUT 
+      or_Reglerantwort  : Real;   // Regler Ausgang
+   END_VAR
+
+   VAR 
+      Reglerantwort_Integral  : Real;
+      Reglerantwort_Proportional : Real;
+      VergangeneZeit : Real;   // in s
+   END_VAR
+   
+   CONST
+      UnteresLimit := 0.0;   // unteres Limit
+      OberesLimit  := 100.0;   // oberes Limit
+   END_CONST
+
+BEGIN
+    //read elpsed Time in s since last Time from OB1 Temp
+    VergangeneZeit := INT_TO_REAL(ii_OB1_PREV_CYCLE)/1000;
+    //initialize at power_up
+    IF ib_Reset THEN
+        Reglerantwort_Integral := 0.0;
+        or_Reglerantwort := 0.0;
+    ELSE
+        // calculate proportional part 
+        Reglerantwort_Proportional := ir_ProportionalVerstaerkung * (ir_Sollwert - ir_Istwert);
+        //run integrator only IF Time makes sens 
+        IF VergangeneZeit > 0 AND VergangeneZeit < 0.1 THEN
+            Reglerantwort_Integral :=  Reglerantwort_Integral + ir_IntegralVerstaerkung *
+            (ir_Sollwert - ir_Istwert) * VergangeneZeit;
+        END_IF;
+        // calculate output  
+        or_Reglerantwort := Reglerantwort_Proportional + Reglerantwort_Integral;
+        // check output FOR limits
+        IF or_Reglerantwort >= OberesLimit THEN
+            or_Reglerantwort := OberesLimit;
+            Reglerantwort_Integral := OberesLimit - Reglerantwort_Proportional;
+        ELSIF or_Reglerantwort <= UnteresLimit THEN
+            or_Reglerantwort := UnteresLimit;
+            Reglerantwort_Integral := UnteresLimit - Reglerantwort_Proportional;
+        END_IF;
+    END_IF;
+      
+END_FUNCTION_BLOCK
+

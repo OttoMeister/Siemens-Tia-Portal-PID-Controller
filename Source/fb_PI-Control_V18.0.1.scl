@@ -1,0 +1,63 @@
+﻿FUNCTION_BLOCK "fb_PI-Control_V18.0.1"
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : sf
+FAMILY : XXX
+VERSION : 1.0
+   VAR_INPUT 
+      ir_Input { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;   // Istwert
+      ir_Setpoint { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;   // Sollwert
+      ir_ProportionalGain { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real := 20.0;   // Proportional-Verstärkung
+      ir_IntegrationGain { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real := 5.0;   // Integral-Verstärkung
+      ib_Reset { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool := FALSE;   // Reset
+   END_VAR
+
+   VAR_OUTPUT 
+      or_Output { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;   // Regler Ausgang 0-100%
+   END_VAR
+
+   VAR 
+      StaticCycleTime_Aux { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : LReal;
+      Controller_Response_Integral_AUX { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;
+      Controller_Response_Integral { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;
+      Controller_Response_Proportional { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;
+      PastTime { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;   // in s
+   END_VAR
+
+   VAR CONSTANT 
+      Lower_limit : Real := 0.0;   // unteres Limit
+      Upper_limit : Real := 100.0;   // oberes Limit
+   END_VAR
+
+
+BEGIN
+	#PastTime := LREAL_TO_REAL(RUNTIME(#StaticCycleTime_Aux));
+	IF #ib_Reset THEN
+	    #Controller_Response_Integral := 0.0;
+	    #or_Output := 0.0;
+	ELSE
+	    #Controller_Response_Proportional := #ir_ProportionalGain * (#ir_Setpoint - #ir_Input);
+	    IF #PastTime > 0 AND #PastTime < 0.1 THEN
+	        #Controller_Response_Integral += #ir_IntegrationGain * (#ir_Setpoint - #ir_Input) * #PastTime;
+	    END_IF;
+	    
+	    IF #Controller_Response_Integral < #Lower_limit THEN
+	        #Controller_Response_Integral := #Lower_limit;
+	    END_IF;
+	    IF #Controller_Response_Integral > #Upper_limit THEN
+	        #Controller_Response_Integral := #Upper_limit;
+	    END_IF;
+	    IF #Controller_Response_Proportional + #Controller_Response_Integral > #Upper_limit THEN
+	        #Controller_Response_Integral := #Upper_limit - #Controller_Response_Proportional;
+	    END_IF;
+	    IF #Controller_Response_Integral > #Upper_limit THEN
+	        #Controller_Response_Integral := #Upper_limit;
+	    END_IF;
+	    IF #Controller_Response_Integral < #Lower_limit THEN
+	        #Controller_Response_Integral := #Lower_limit;
+	    END_IF;
+	    #or_Output := LIMIT(MN := #Lower_limit,
+	                               IN := #Controller_Response_Proportional + #Controller_Response_Integral,
+	                               MX := #Upper_limit);
+	END_IF;
+END_FUNCTION_BLOCK
+

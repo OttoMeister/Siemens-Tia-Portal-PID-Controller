@@ -1,0 +1,35 @@
+﻿FUNCTION_BLOCK "fb_ClockGenerator_V15.0.2"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+   VAR_INPUT 
+      ir_PulsePauseLengthSeconds { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;   // Puls Pause Länge in Sekunden
+      ir_PulsePauseRatioPercent { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real := 50.0;   // Pulse Pause Ratio in Prozent
+      ib_Start { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+   END_VAR
+
+   VAR_OUTPUT 
+      ob_Clock { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+   END_VAR
+
+   VAR 
+      instTofTimePulse {InstructionName := 'TOF_TIME'; LibVersion := '1.0'; ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : TOF_TIME;   // -
+      instTofTimePause {InstructionName := 'TOF_TIME'; LibVersion := '1.0'; ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : TOF_TIME;   // -
+      statTimePulse { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Time;   // -
+      statTimePause { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Time;   // -
+   END_VAR
+
+   VAR_TEMP 
+      tempPulseRate : Real;   // -
+   END_VAR
+
+
+BEGIN
+	#tempPulseRate := #ir_PulsePauseRatioPercent / 100;
+	#statTimePulse := UDINT_TO_TIME(REAL_TO_UDINT(1000.0 * #ir_PulsePauseLengthSeconds * #tempPulseRate));    
+	#statTimePause := UDINT_TO_TIME(REAL_TO_UDINT(1000.0 * #ir_PulsePauseLengthSeconds * (1-#tempPulseRate)));
+	#instTofTimePulse(IN := NOT #instTofTimePause.Q,PT := #statTimePulse);
+	#instTofTimePause(IN := #instTofTimePulse.Q, PT := #statTimePause);
+	IF #ib_Start THEN #ob_Clock := #instTofTimePulse.Q;
+	ELSE #ob_Clock := FALSE; END_IF;
+END_FUNCTION_BLOCK
+

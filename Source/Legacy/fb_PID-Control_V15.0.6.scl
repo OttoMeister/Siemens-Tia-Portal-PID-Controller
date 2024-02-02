@@ -1,0 +1,148 @@
+﻿FUNCTION_BLOCK "fb_PI-Control_V15.0.7"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+   VAR_INPUT 
+      ir_Input { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;   // Istwert
+      ir_Setpoint { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;   // Sollwert
+      ir_ProportionalGain { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real := 20.0;   // Proportional-Verstärkung
+      ir_IntegrationGain { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real := 5.0;   // Integral-Verstärkung
+      ib_Reset { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool := FALSE;   // Reset
+   END_VAR
+
+   VAR_OUTPUT 
+      or_Output { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;   // Regler Ausgang 0-100%
+   END_VAR
+
+   VAR 
+      StaticCycleTime_Aux { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : LReal;
+      Controller_Response_Integral_AUX { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;
+      Controller_Response_Integral { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;
+      Controller_Response_Proportional { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;
+      PastTime { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;   // in s
+   END_VAR
+
+   VAR CONSTANT 
+      Lower_limit : Real := 0.0;   // unteres Limit
+      Upper_limit : Real := 100.0;   // oberes Limit
+   END_VAR
+
+
+BEGIN
+	#PastTime := LREAL_TO_REAL(RUNTIME(#StaticCycleTime_Aux));
+	IF #ib_Reset THEN
+	    #Controller_Response_Integral := 0.0;
+	    #or_Output := 0.0;
+	ELSE
+	    #Controller_Response_Proportional := #ir_ProportionalGain * (#ir_Setpoint - #ir_Input);
+	    IF #PastTime > 0 AND #PastTime < 0.1 THEN
+	        #Controller_Response_Integral += #ir_IntegrationGain * (#ir_Setpoint - #ir_Input) * #PastTime;
+	    END_IF;
+	    
+	    IF #Controller_Response_Integral < #Lower_limit THEN
+	        #Controller_Response_Integral := #Lower_limit;
+	    END_IF;
+	    IF #Controller_Response_Integral > #Upper_limit THEN
+	        #Controller_Response_Integral := #Upper_limit;
+	    END_IF;
+	    IF #Controller_Response_Proportional + #Controller_Response_Integral > #Upper_limit THEN
+	        #Controller_Response_Integral := #Upper_limit - #Controller_Response_Proportional;
+	    END_IF;
+	    IF #Controller_Response_Integral > #Upper_limit THEN
+	        #Controller_Response_Integral := #Upper_limit;
+	    END_IF;
+	    IF #Controller_Response_Integral < #Lower_limit THEN
+	        #Controller_Response_Integral := #Lower_limit;
+	    END_IF;
+	    #or_Output := LIMIT(MN := #Lower_limit,
+	                               IN := #Controller_Response_Proportional + #Controller_Response_Integral,
+	                               MX := #Upper_limit);
+	END_IF;
+END_FUNCTION_BLOCK
+
+FUNCTION_BLOCK "fb_D-Control_V15.0.5"
+TITLE = D-Regler
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : sf
+   VAR_INPUT 
+      ir_SetpointDiverence { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;   // SollstwertDiverenz
+      ir_DifferentialGain { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real := 1.0e+0;   // Differenzial-Verstärkung
+      itime_DifferezialActionTime { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Time;   // Differenzial-Haltezeit
+      ib_Reset { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool := FALSE;   // Reset
+   END_VAR
+
+   VAR_OUTPUT 
+      or_Output { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;   // Reglerantwort
+   END_VAR
+
+   VAR 
+      Intermediate_value { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;
+      PastTime { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;   // in s
+      StaticCycleTime_Aux { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : LReal;
+   END_VAR
+
+   VAR_TEMP 
+      HoldingTime : Real;   // in s
+   END_VAR
+
+
+BEGIN
+	#PastTime := LREAL_TO_REAL(RUNTIME(#StaticCycleTime_Aux));
+	#HoldingTime := DINT_TO_REAL(TIME_TO_DINT(#itime_DifferezialActionTime)) * 0.001;
+	IF #itime_DifferezialActionTime = t#0s OR #ib_Reset THEN
+	    #Intermediate_value := 0;
+	    #or_Output := 0;
+	ELSE
+	    IF #PastTime > 0 AND #PastTime < 0.1 THEN
+	        #Intermediate_value += (#ir_SetpointDiverence - #Intermediate_value) * #PastTime / #HoldingTime;
+	    END_IF;
+	    #or_Output := (#ir_SetpointDiverence - #Intermediate_value) * #ir_DifferentialGain ;
+	END_IF;
+END_FUNCTION_BLOCK
+
+FUNCTION_BLOCK "fb_PID-Control_V15.0.6"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+   VAR_INPUT 
+      ir_Input { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;   // Istwert
+      ir_Setpoint { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;   // Sollwert
+      ir_ProportionalGain { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real := 20.0;   // Proportional-Verstärkung
+      ir_IntegrationGain { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real := 5.0;   // Integral-Verstärkung
+      ir_DifferentialGain { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real := 1.0;   // Differenzial-Verstärkung
+      itime_DifferezialActionTime { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Time := t#1s;   // Differenzial-Haltezeit
+      ib_Reset { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool := FALSE;   // Reset
+   END_VAR
+
+   VAR_OUTPUT 
+      or_Output { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;   // Regler Ausgang
+   END_VAR
+
+   VAR 
+      "idb_PI-Control" { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : "fb_PI-Control_V15.0.7";
+      "idb_D-Control" { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : "fb_D-Control_V15.0.5";
+      "ControllerResponse_Integral+Proportional" { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;
+      ControllerResponse_Differential { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;
+   END_VAR
+
+   VAR CONSTANT 
+      Lower_limit : Real := 0.0;
+      Upper_limit : Real := 100.0;
+   END_VAR
+
+
+BEGIN
+	#"idb_PI-Control"(ir_Input := #ir_Input,
+	                 ir_Setpoint := #ir_Setpoint,
+	                 ir_ProportionalGain := #ir_ProportionalGain,
+	                 ir_IntegrationGain := #ir_IntegrationGain,
+	                 ib_Reset := #ib_Reset,
+	                 or_Output => #"ControllerResponse_Integral+Proportional");
+	#"idb_D-Control"(ir_SetpointDiverence := #ir_Setpoint - #ir_Input,
+	                ir_DifferentialGain := #ir_DifferentialGain,
+	                itime_DifferezialActionTime := #itime_DifferezialActionTime,
+	                ib_Reset := #ib_Reset,
+	                or_Output => #ControllerResponse_Differential);
+	#or_Output := LIMIT(MN := #Lower_limit,
+	                           IN := #"ControllerResponse_Integral+Proportional" + #ControllerResponse_Differential,
+	                           MX := #Upper_limit);
+END_FUNCTION_BLOCK
+
