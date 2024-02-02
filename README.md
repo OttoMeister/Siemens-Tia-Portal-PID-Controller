@@ -33,7 +33,7 @@ The controller produce a outputs from 0 to 100. If used with a binary actor you 
 ## Installing
 Installing is quite simple. Insert the two SLC files under "External source files" and then execute the menu item "Generate blocks from source".
 
-![](Generate-blocks2.png)
+![](Generate-blocks.png)
 
 ## Porting
 Note on porting to Step-7, Codesys or similar:
