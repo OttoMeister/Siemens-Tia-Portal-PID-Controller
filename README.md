@@ -13,7 +13,7 @@ I always had a lot to do with control technology at the Tia Portal and was simpl
 - Many thousands of pages of manuals.
 
 ## Work
-After an extensive search, I couldn't find an alternative solution. However, taking OSCAT as inspiration, which is quite straightforward, I've rewritten the functions in TIA14 and 15 for the 1200 and 1500 CPUs. I continue to use this control in my Tia Portal 19 projects. My goal wasn't to please everyone but to give something back. I've gained valuable knowledge through open libraries like OSCAT, and it's only fair that I share my work. 
+After an extensive search, I couldn't find an alternative solution. However, taking OSCAT as inspiration, which is quite straightforward, I've rewritten the functions in TIA14 and 15 for the 1200 and 1500 CPUs. I continue to use this control in my Tia Portal 18 projects. My goal wasn't to please everyone but to give something back. I've gained valuable knowledge through open libraries like OSCAT, and it's only fair that I share my work. 
 Please refrain from debating the functions; they work as intended. Feel free to copy and use them. If you'd like, share your experiences with my software with others.
 
 ## Using instruction
