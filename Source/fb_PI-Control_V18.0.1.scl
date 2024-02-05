@@ -56,8 +56,8 @@ BEGIN
 	        #Controller_Response_Integral := #Lower_limit;
 	    END_IF;
 	    #or_Output := LIMIT(MN := #Lower_limit,
-	                               IN := #Controller_Response_Proportional + #Controller_Response_Integral,
-	                               MX := #Upper_limit);
+	          IN := #Controller_Response_Proportional + #Controller_Response_Integral,
+	          MX := #Upper_limit);
 	END_IF;
 END_FUNCTION_BLOCK
 
