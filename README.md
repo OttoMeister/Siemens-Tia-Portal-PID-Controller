@@ -37,7 +37,7 @@ Installing is quite simple. Insert the two SLC files under "External source file
 
 ## Porting
 Code is very easy:
-...
+```
 // Proportional
 #Controller_Response_Proportional := #ir_ProportionalGain * (#ir_Setpoint - #ir_Input);
 // Intergal
@@ -49,7 +49,7 @@ Code is very easy:
 The rest is just preventig the interal to windup aud check the Cycle time is valid.
 
 Note on porting to Step-7, Codesys or similar:
-...
+```
 #PastTime := LREAL_TO_REAL(RUNTIME(#StaticCycleTime_Aux));
 IF #PastTime > 0 AND #PastTime < 0.1 THEN
 ```    
