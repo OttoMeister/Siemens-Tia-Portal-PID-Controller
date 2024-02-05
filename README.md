@@ -17,7 +17,7 @@ After an extensive search, I couldn't find an alternative solution. However, tak
 Please refrain from debating the functions; they work as intended. Feel free to copy and use them. If you'd like, share your experiences with my software with others.
 
 ## Using instruction
-The controller produce a outputs from 0 to 100. If used with a binary actor you shoud use the clock generator for pulse width modulation. The PI controller are disigned to run alone. Usefull for pressure regulation. The PID controller is a combination of PI and D controller. Usefull for temperature regulation. The controller should alwasys stoped with the reset input is the regulation loop is disturbed. This prevents the integral to windup. 
+The controller produce a outputs from 0 to 100. If used with a binary actor you shoud use the clock generator for pulse width modulation. The PI controller are disigned to run alone. Usefull for pressure regulation. The PID controller is a combination of PI and D controller. Usefull for temperature regulation. The controller should alwasys stoped with the reset input if the regulation loop is disturbed. This prevents the integral to windup. 
 
 - ir_Input = The mesuered value of pressure or themperature
 - ir_Setpoint = The demanded value of pressure or themperature
