@@ -1,42 +1,43 @@
 # PID controller for Siemens SCL Tia-Portal
 
 ## Problem
-I always had a lot to do with control technology at the Tia Portal and was simply never satisfied with the Siemens modules. I need PI controllers for pressure control and PID for temperature control. Here are a few points that bothered me:
-- Different devices among different CPUs use deferent lib.
-- Cannot be simulated.
-- Not posible to read the source and change it.
-- Far too complicated with a high level of familiarisation.
-- No portability to Codesys.
-- Too high integration in TIA.
-- Do a lot of tinkering and testing until finally something worked.
-- Cyclic OBs and Global DB were absolutely necessary. You can not integrate it in your privat functions.
-- Many thousands of pages of manuals.
+I have always been deeply involved in control technology within the TIA Portal environment and have consistently found Siemens modules to be unsatisfactory. I require PI controllers for pressure regulation and PID controllers for temperature control. Here are a few issues that have bothered me:
+
+- Different devices among different CPUs use different libraries.
+- Simulation is not supported.
+- Source code cannot be accessed or modified.
+- Complexity is too high, requiring significant familiarization.
+- Lack of portability to Codesys.
+- Excessive integration within TIA Portal.
+- Significant trial and error required until achieving functionality.
+- Cyclic OBs and Global DBs are absolutely necessary. Integration within private functions is not possible.
+- Manuals span thousands of pages.
 
 ## Work
-After an extensive search, I couldn't find an alternative solution. However, taking OSCAT as inspiration, which is quite straightforward, I've rewritten the functions in TIA14 and 15 for the 1200 and 1500 CPUs. I continue to use this control in my Tia Portal 18 projects. My goal wasn't to please everyone but to give something back. I've gained valuable knowledge through open libraries like OSCAT, and it's only fair that I share my work. 
-Please refrain from debating the functions; they work as intended. Feel free to copy and use them. If you'd like, share your experiences with my software with others.
+After an extensive search for alternatives, I failed to find a suitable solution. Drawing inspiration from OSCAT, which is straightforward, I have rewritten functions for TIA14 and 15 compatible with 1200 and 1500 series CPUs. I continue to implement these controls in my TIA Portal 18 projects. My intention was not to cater to everyone but to contribute back to the community. Open libraries like OSCAT have provided me with valuable knowledge, and it is only fair that I share my work.
+Please refrain from debating the functionality; these functions work as intended. Feel free to copy and use them. If you wish, share your experiences with my software with others.
 
-## Using instruction
-The controller produce a outputs from 0 to 100. If used with a binary actor you shoud use the clock generator for pulse width modulation. The PI controller are disigned to run alone. Usefull for pressure regulation. The PID controller is a combination of PI and D controller. Usefull for temperature regulation. The controller should alwasys stoped with the reset input if the regulation loop is disturbed. This prevents the integral to windup. 
+## Usage Instructions
+The controller produces outputs ranging from 0 to 100. When used with a binary actuator, utilize the clock generator for pulse width modulation. The PI controller is designed to operate independently, suitable for pressure regulation. The PID controller combines PI and D control, suitable for temperature regulation. Always stop the controller with the reset input if the regulation loop is disrupted. This prevents integral windup.
 
-- ir_Input = The mesuered value of pressure or themperature
-- ir_Setpoint = The demanded value of pressure or themperature
-- ir_ProportionalGain = The proportional gain, a tuning parameter
-- ir_IntegrationGain = The integral gain, a tuning parameter
-- ir_DifferentialGain = The derivative gain, a tuning parameter
-- itime_DifferezialActionTime = The length of the derivative action, a tuning parameter
-- ib_Reset = Empty the integral and sets the output to zero
-- or_Output = Output value in % from 0 to 100
+- ir_Input: The measured value of pressure or temperature.
+- ir_Setpoint: The desired value of pressure or temperature.
+- ir_ProportionalGain: The proportional gain, a tuning parameter.
+- ir_IntegrationGain: The integral gain, a tuning parameter.
+- ir_DifferentialGain: The derivative gain, a tuning parameter.
+- itime_DifferentialActionTime: The length of the derivative action, a tuning parameter.
+- ib_Reset: Empty the integral and set the output to zero.
+- or_Output: Output value in % from 0 to 100.
 
 ![](PID-Control2.png)
 
 ## Installing
-Installing is quite simple. Insert the two SLC files under "External source files" and then execute the menu item "Generate blocks from source".
+Installation is straightforward. Place the two SLC files under "External source files" and execute the menu item "Generate blocks from source."
 
 ![](Generate-blocks.png)
 
 ## Porting
-Code is very easy:
+Porting code is simple:
 ```
 // Proportional
 #Controller_Response_Proportional := #ir_ProportionalGain * (#ir_Setpoint - #ir_Input);
@@ -46,14 +47,14 @@ Code is very easy:
 #Intermediate_value += (#ir_SetpointDiverence - #Intermediate_value) * #PastTime / #HoldingTime;
 #or_Output := (#ir_SetpointDiverence - #Intermediate_value) * #ir_DifferentialGain ;
 ```
-The rest is just preventig the interal to windup aud check the Cycle time is valid.
+Rest of code is mostly to prevent integral windup and ensure the cycle time is valid.
 
-Note on porting to Step-7, Codesys or similar:
+Note on porting to Step-7, Codesys, or similar:
 ```
 #PastTime := LREAL_TO_REAL(RUNTIME(#StaticCycleTime_Aux));
 IF #PastTime > 0 AND #PastTime < 0.1 THEN
 ```    
-The first line returns the time between two calls in seconds. The resolution is accurate to the nanosecond. The second one checks the validity. With Step-7 I would pass the time as parameter, with Codesys TIME_TCK can be used. On 300 PLC it might be possible to work with "SFC64"(TIMETICK). 
+The first line returns the time between two calls in seconds with nanosecond accuracy. The second line checks validity. With Step-7, pass time as a parameter; with Codesys, use TIME_TCK. On 300 PLC, it might be possible to work with "SFC64" (TIMETICK).
 
 ## License
 This project is released under the WTFPL LICENSE.
