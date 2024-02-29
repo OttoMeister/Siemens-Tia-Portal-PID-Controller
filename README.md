@@ -24,8 +24,8 @@ The controller produces outputs ranging from 0 to 100. When used with a binary a
 - ir_Setpoint: The desired value of pressure or temperature.
 - ir_ProportionalGain: The proportional gain, a tuning parameter.
 - ir_IntegrationGain: The integral gain, a tuning parameter.
-- ir_DifferentialGain: The derivative gain, a tuning parameter.
-- itime_DifferentialActionTime: The length of the derivative action, a tuning parameter.
+- ir_DerviateGain: The derivative gain, a tuning parameter.
+- ir_DerviateActionTime: The length of the derivative action, a tuning parameter.
 - ib_Reset: Empty the integral and set the output to zero.
 - or_Output: Output value in % from 0 to 100.
 
@@ -43,9 +43,9 @@ Porting code is simple:
 #Controller_Response_Proportional := #ir_ProportionalGain * (#ir_Setpoint - #ir_Input);
 // Intergal
 #Controller_Response_Integral += #ir_IntegrationGain * (#ir_Setpoint - #ir_Input) * #PastTime;
-// Differential
-#Intermediate_value += (#ir_SetpointDiverence - #Intermediate_value) * #PastTime / #HoldingTime;
-#or_Output := (#ir_SetpointDiverence - #Intermediate_value) * #ir_DifferentialGain ;
+// Derviate
+#Intermediate_value += (#ir_SetpointDiverence - #Intermediate_value) * #PastTime / #ir_DerivateActionTime;
+#or_Output := (#ir_SetpointDiverence - #Intermediate_value) * #ir_DerivateGain;
 ```
 Rest of code is mostly to prevent integral windup and ensure the cycle time is valid.
 
