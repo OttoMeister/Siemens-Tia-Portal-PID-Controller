@@ -1,0 +1,49 @@
+﻿FUNCTION_BLOCK "fb_PID-Control_V18.0.2"
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : sf
+FAMILY : HKS
+VERSION : 1.0
+   VAR_INPUT 
+      ir_Input { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;
+      ir_Setpoint { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;
+      ir_ProportionalGain { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real := 20.0;
+      ir_IntegrationGain { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real := 5.0;
+      ir_DerviateGain { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real := 5.0;
+      ir_DerivateActionTime { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real := 1.0;
+      ib_Reset { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool := FALSE;
+   END_VAR
+
+   VAR_OUTPUT 
+      or_Output { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;
+   END_VAR
+
+   VAR 
+      "idb_PI-Control" { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'; S7_SetPoint := 'False'} : "fb_PI-Control_V18.0.1";
+      "idb_D-Control" { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'; S7_SetPoint := 'False'} : "fb_D-Control_V18.0.2";
+      "ControllerResponse_Integral+Proportional" { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;
+      ControllerResponse_Differential { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;
+   END_VAR
+
+   VAR CONSTANT 
+      Lower_limit : Real := 0.0;
+      Upper_limit : Real := 100.0;
+   END_VAR
+
+
+BEGIN
+	#"idb_PI-Control"(ir_Input := #ir_Input,
+	                 ir_Setpoint := #ir_Setpoint,
+	                 ir_ProportionalGain := #ir_ProportionalGain,
+	                 ir_IntegrationGain := #ir_IntegrationGain,
+	                 ib_Reset := #ib_Reset,
+	                 or_Output => #"ControllerResponse_Integral+Proportional");
+	#"idb_D-Control"(ir_SetpointDiverence :=  #ir_Setpoint - #ir_Input,
+	                ir_DerivateGain := #ir_DerviateGain,
+	                ir_DerivateActionTime := #ir_DerivateActionTime,
+	                ib_Reset := #ib_Reset,
+	                or_Output => #ControllerResponse_Differential);
+	#or_Output := LIMIT(MN := #Lower_limit,
+	                    IN := #"ControllerResponse_Integral+Proportional" + #ControllerResponse_Differential,
+	                    MX := #Upper_limit);
+END_FUNCTION_BLOCK
+
