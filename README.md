@@ -1,5 +1,3 @@
-# PID controller for Siemens SCL Tia-Portal
-
 ```
   ____ ___ ____                    _             _ _           
  |  _ \_ _|  _ \    ___ ___  _ __ | |_ _ __ ___ | | | ___ _ __ 
@@ -15,8 +13,6 @@
    | | | | (_| |_____|  __/ (_) | |  | || (_| | |              
    |_| |_|\__,_|     |_|   \___/|_|   \__\__,_|_|              
 ```                                                   
-
-
 
 ## Problem
 I have always been deeply involved in control technology within the TIA Portal environment and have consistently found Siemens modules to be unsatisfactory. I require PI controllers for pressure regulation and PID controllers for temperature control. Here are a few issues that have bothered me:
