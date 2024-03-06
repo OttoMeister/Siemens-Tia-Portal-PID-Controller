@@ -52,7 +52,7 @@ Installation is straightforward. Place the two SLC files under "External source 
 
 ## Porting
 Porting code is simple:
-```STL
+```
 // Proportional
 #Controller_Response_Proportional := #ir_ProportionalGain * (#ir_Setpoint - #ir_Input);
 // Intergal
