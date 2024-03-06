@@ -22,10 +22,10 @@ The controller produces outputs ranging from 0 to 100. When used with a binary a
 
 - ir_Input: The measured value of pressure or temperature.
 - ir_Setpoint: The desired value of pressure or temperature.
-- ir_ProportionalGain: The proportional gain, a tuning parameter.
-- ir_IntegrationGain: The integral gain, a tuning parameter.
-- ir_DerviateGain: The derivative gain, a tuning parameter.
-- ir_DerviateActionTime: The length of the derivative action, a tuning parameter.
+- ir_ProportionalGain: The proportional gain factor, a tuning parameter. The difference between ir_Input and ir_Setpoint is multiplied by this factor and added to the output value. Higher values result in a higher control response.
+- ir_IntegrationGain: The integration gain factor, a tuning parameter. We use a triangular curve. The integral value increases or decreases by the difference between ir_Input and ir_Setpoint per second. A high value results in rapid rise or fall of the integral value.
+- ir_DerviateGain: The differential gain factor, a tuning parameter. The difference between ir_Input and ir_Setpoint is multiplied by the differential gain. Depending on the action time, the differential response decreases rapidly. A high value results in a high differential response.
+- ir_DerviateActionTime: The length of the differential action, a tuning parameter. The duration in seconds until the differential response has halved. A high value results in a long differential response.
 - ib_Reset: Empty the integral and set the output to zero.
 - or_Output: Output value in % from 0 to 100.
 
