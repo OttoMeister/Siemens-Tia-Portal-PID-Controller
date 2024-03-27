@@ -37,7 +37,7 @@ BEGIN
 	    // calculate proportional part 
 	    #Reglerantwort_Proportional := #ir_ProportionalVerstärkung * (#ir_Sollwert - #ir_Istwert);
 	    //run integrator only IF Time makes sens 
-	    IF #VergangeneZeit > 0 AND #VergangeneZeit < 0.1 THEN
+	    IF #VergangeneZeit > 0 AND #VergangeneZeit < 2.0 THEN
 	        #Reglerantwort_Integral :=  #Reglerantwort_Integral + #ir_IntegralVerstärkung *
 	        (#ir_Sollwert - #ir_Istwert) * #VergangeneZeit;
 	    END_IF;
