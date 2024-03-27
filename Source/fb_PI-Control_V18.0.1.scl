@@ -36,7 +36,7 @@ BEGIN
 	    #or_Output := 0.0;
 	ELSE
 	    #Controller_Response_Proportional := #ir_ProportionalGain * (#ir_Setpoint - #ir_Input);
-	    IF #PastTime > 0 AND #PastTime < 0.1 THEN
+	    IF #PastTime > 0 AND #PastTime < 2.0 THEN
 	        #Controller_Response_Integral += #ir_IntegrationGain * (#ir_Setpoint - #ir_Input) * #PastTime;
 	    END_IF;
 	    
