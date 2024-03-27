@@ -43,6 +43,8 @@ The controller produces outputs ranging from 0 to 100. When used with a binary a
 - ib_Reset: Empty the integral and set the output to zero.
 - or_Output: Output value in % from 0 to 100.
 
+Please note: If you have an extremely large control system, you should call the PI or PID module cyclically every second, as otherwise the internal floating-point numbers become too small and there will be calculation errors.
+
 ![](PID-Control2.png)
 
 ## Installing
