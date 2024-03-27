@@ -33,7 +33,7 @@ BEGIN
 	    #Intermediate_value := 0;
 	    #or_Output := 0;
 	ELSE
-	    IF #PastTime > 0 AND #PastTime < 0.1 THEN
+	    IF #PastTime > 0 AND #PastTime < 2.0 THEN
 	        #Intermediate_value += (#ir_SetpointDiverence - #Intermediate_value) * #PastTime / #ir_DerivateActionTime;
 	    END_IF;
 	    #or_Output := LIMIT(MN := #Lower_limit,
