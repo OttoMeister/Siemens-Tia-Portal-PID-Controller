@@ -66,7 +66,7 @@ Rest of code is mostly to prevent integral windup and ensure the cycle time is v
 Note on porting to Step-7, Codesys, or similar:
 ```
 #PastTime := LREAL_TO_REAL(RUNTIME(#StaticCycleTime_Aux));
-IF #PastTime > 0 AND #PastTime < 0.1 THEN
+IF #PastTime > 0 AND #PastTime < 2.0 THEN
 ```    
 The first line returns the time between two calls in seconds with nanosecond accuracy. The second line checks validity. With Step-7, pass time as a parameter; with Codesys, use TIME_TCK. On 300 PLC, it might be possible to work with "SFC64" (TIMETICK).
 
