@@ -28,7 +28,7 @@ I have always been deeply involved in control technology within the TIA Portal e
 - Manuals span thousands of pages.
 
 ## Work
-After an extensive search for alternatives, I failed to find a suitable solution. Drawing inspiration from OSCAT, which is straightforward, I have rewritten functions for TIA14 and 15 compatible with 1200 and 1500 series CPUs. I continue to implement these controls in my TIA Portal 18 projects. My intention was not to cater to everyone but to contribute back to the community. Open libraries like OSCAT have provided me with valuable knowledge, and it is only fair that I share my work.
+After an extensive search for alternatives, I failed to find a suitable solution. Drawing inspiration from OSCAT, which is straightforward, I have rewritten functions for TIA14 and 15 compatible with 1200 and 1500 series CPUs. I continue to implement these controls in my TIA Portal 20 projects. My intention was not to cater to everyone but to contribute back to the community. Open libraries like OSCAT have provided me with valuable knowledge, and it is only fair that I share my work.
 Please refrain from debating the functionality; these functions work as intended. Feel free to copy and use them. If you wish, share your experiences with my software with others.
 
 ## Usage Instructions
